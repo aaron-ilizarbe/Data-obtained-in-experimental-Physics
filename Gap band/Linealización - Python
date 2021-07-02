@@ -1,0 +1,76 @@
+#!/usr/bin/python3
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+import warnings
+warnings.filterwarnings("ignore")
+
+xt = np.array([2.364, 2.370, 2.375, 2.381, 2.387, 2.392, 2.398, 2.404, 2.410, 2.416, 2.421, 2.427, 2.433, 2.439, 2.445, 2.451, 2.457, 2.463, 2.469, 2.475, 2.481, 2.488, 2.494, 2.500])
+yt = np.array([3.484,3.466,3.434, 3.418, 3.388, 3.367,3.350, 3.336, 3.300, 3.288, 3.266, 3.250, 3.254, 3.215, 3.199, 3.178, 3.144, 3.118,3.086, 3.063,3.035, 2.996,2.950, 2.918])
+
+x = 1/xt
+y = np.log(yt)
+
+
+
+print("************************************")
+print("          Regresión Lineal")
+print("************************************")
+q = np.linspace(2.363, 2.501, 100)         # Definimos en q en el dominio de x.
+def RegresionLineal(x, y, t):       # Creamos nuestra función de ajuste Regresión Lineal.
+    n = len(x)                      # n es la longitud de los datos.
+    sumax = 0                       # Inicializamos la suma de los valores de x en cero.
+    sumay = 0                       # Inicializamos la suma de los valores de y en cero.
+    sumaxy = 0                      # Inicializamos la suma de los valores de x.y en cero.
+    sumax2 = 0                      # Inicializamos la suma de los valores de x^2 en cero.
+    sr =0                           # Inicializamos sr en cero.
+    st =0                           # Inicializamos st en cero.
+    for i in range(n):              # i recorre todos los datos.
+        sumax = sumax + x[i]        # La suma x es tal cual la suma de los x.
+        sumay = sumay + y[i]        # La suma y es tal cual la suma de los y.
+        sumaxy = sumaxy + x[i]*y[i] # La suma x.y es tal cual la suma de los x[i].y[i].
+        sumax2 = sumax2 + x[i]*x[i] # La suma x^2 es tal cual la suma de los x[i].x[i].
+    xm = sumax/n                    # Definimos xm como la media aritmética de los x.
+    ym = sumay/n                    # Definimos ym como la media aritmética de los y.
+    a1 = (n*sumaxy - sumax*sumay)/(n*sumax2 - sumax*sumax)  # a1 se define de esta manera.
+    a0 = ym - a1*xm                 # a0 se define de esta manera.
+    for i in range(n):              # i recorre todos los datos.
+        st = st + (y[i] - ym)**2    # st se define así.
+        sr = sr + (y[i] - a1*x[i] - a0)**2                  # sr se define así.
+    syx = (sr/(n - 2))**(1/2)       # syx es el error estándar de la estimación.
+    r2 = (st - sr)/st               # r^2 es el cuadrado del coeficiente de determinación.
+    reg = a0 + a1*(t)               # reg es la regresión lineal evaluada en un punto t deseado.
+    return reg, r2**(1/2), a0, a1   # Retorna la Regresión Lineal en un punto, el Coeficiente de Determinación y los coeficientes de la recta.
+RL = RegresionLineal(x, y, 8)       # RL es la función RegresionLineal en el punto 8.
+# print(RL[1])
+def GrafRegresionLineal(x, y, q):   # Creamos esta función para evaluar Regresión Lineal en muchos puntos y poder graficarla.
+    GrafR = []                      # Creamos una lista vacía.
+    for k in range(q.shape[0]):     # k recorre cada valor de q.
+        yf = RegresionLineal(x, y, q[k])[0]                 # yf es el valor de RegresiónLineal en cada punto de q.
+        GrafR.append(yf)            # Almacenamos yf en GrafR.
+    return GrafR                    # Retorna todos los puntos de RegresiónLineal evaluados en q.
+# print(GRL)
+print("Tenemos una recta y = a0 + a1*x")
+print("Donde a0 = ", RL[2], "y a1 = ", RL[3])
+print("En la ecuación del ejercicio:")
+print("ln(I0)", RL[2])
+print("eV/kT", RL[3])
+#print("b:", 1/RL[2])
+#print("a:", (1/RL[2])*RL[3])
+def Funcion1(x, b, a):
+    y = a*(np.exp(b/x) - 1)
+    return y
+xasd = np.linspace(0, 4, 30)
+F = Funcion1(xasd,1/RL[2],(1/RL[2])*RL[3])
+
+
+plt.figure()
+plt.scatter(xt, yt, label = 'Datos Eperimentales', color = 'Brown')
+plt.plot(q, GrafRegresionLineal(xt,yt, q), label = 'Ajuste de Curva', color = 'Orange')
+plt.legend(loc = 'best')
+plt.title('Germanio: Medición 2 - Determinación de Eg')
+plt.text(2.38,3, 'y = -1.781(1/T) + 7.174', fontsize = 10)
+plt.xlabel('1/T(1/kK)')
+plt.ylabel('ln(I)')
+plt.grid()
+plt.show()
